@@ -5,10 +5,10 @@ from datetime import datetime
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'
+app.secret_key = 'your_secret_key'
 
 # TMDB API configuration
-TMDB_API_KEY = '4c04329dcdce0bb4e73a10f729b22393'
+
 BASE_URL = 'https://api.themoviedb.org/3'
 
 # Simulated user database (in a real app, use a proper database)
