@@ -1,0 +1,69 @@
+/* Light Theme (Default) */
+:root {
+    --primary-color: #4e73df;
+    --primary-dark: #2e59d9;
+    --primary-rgb: 78, 115, 223;
+    --secondary-color: #858796;
+    --success-color: #1cc88a;
+    --info-color: #36b9cc;
+    --warning-color: #f6c23e;
+    --danger-color: #e74a3b;
+    --light-color: #f8f9fc;
+    --dark-color: #5a5c69;
+    --bg-color: #f8f9fc;
+    --text-color: #5a5c69;
+    --card-bg: white;
+    --footer-bg: #f8f9fa;
+    --footer-text: #6c757d;
+    --navbar-bg: white;
+    --navbar-text: #5a5c69;
+}
+
+/* Warm Theme */
+.warm-theme {
+    --primary-color: #ff6b6b;
+    --primary-dark: #ff5252;
+    --primary-rgb: 255, 107, 107;
+    --secondary-color: #ffb347;
+    --bg-color: #fff5f5;
+    --text-color: #4a4a4a;
+    --card-bg: white;
+    --footer-bg: #ffefef;
+    --footer-text: #6d6d6d;
+    --navbar-bg: white;
+    --navbar-text: #4a4a4a;
+}
+
+/* Apply theme colors */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.navbar {
+    background-color: var(--navbar-bg) !important;
+    color: var(--navbar-text);
+}
+
+.navbar-brand, .nav-link {
+    color: var(--navbar-text) !important;
+}
+
+.card {
+    background-color: var(--card-bg);
+}
+
+.form-control, .form-select {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
