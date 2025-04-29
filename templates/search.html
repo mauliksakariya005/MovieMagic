@@ -5,20 +5,23 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card mb-4">
-            <div class="card-body">
-                <h2 class="card-title text-center mb-4"><i class="fas fa-search me-2"></i>Search Movies</h2>
-                <form action="{{ url_for('search') }}" method="get">
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control form-control-lg" name="q" placeholder="Search for movies..." value="{{ query if query }}">
-                        <button class="btn btn-primary" type="submit">
-                            <i class="fas fa-search"></i> Search
+        <div class="card shadow-sm rounded-4 mb-5 border-0">
+            <div class="card-body px-4 py-4">
+                <h3 class="text-center mb-4">
+                    <i class="fas fa-search me-2 text-primary"></i>
+                    <span class="fw-semibold">Search Movies</span>
+                </h3>
+                <form action="{{ url_for('search') }}" method="get" class="mx-auto" style="max-width: 600px;">
+                    <div class="input-group input-group-lg">
+                        <input type="text" class="form-control rounded-start-pill" name="q" placeholder="Search for movies..." value="{{ query if query }}">
+                        <button class="btn btn-primary rounded-end-pill px-4" type="submit">
+                            <i class="fas fa-search"></i>
                         </button>
                     </div>
                 </form>
             </div>
         </div>
-
+        
         {% if query %}
             <div class="card">
                 <div class="card-header">
@@ -28,7 +31,7 @@
                     {% if movies %}
                         <div class="row">
                             {% for movie in movies %}
-                            <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="col-6 col-md-4 col-lg-2-4 mb-4">
                                 <div class="card h-100 movie-card">
                                     {% if movie.poster_path %}
                                         <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" class="card-img-top" alt="{{ movie.title }}">

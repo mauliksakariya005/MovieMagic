@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import requests
+import os
 import random
 from datetime import datetime
-from datetime import datetime
+from flask_cors import CORS
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
@@ -23,18 +25,18 @@ def inject_now():
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    # Example backdrop image (change it as necessary)
+    backdrop_path = 'your_default_image.jpg'
+    return render_template('home.html', backdrop_path=backdrop_path)
 
 @app.route('/recommend', methods=['GET', 'POST'])
 def recommend():
     if request.method == 'POST':
-        # Get user preferences from form
         genres = request.form.getlist('genres')
         min_rating = request.form.get('min_rating', 6)
         year = request.form.get('year', '2020')
         language = request.form.get('language', 'en')
         
-        # Call TMDB API to get recommendations
         url = f"{BASE_URL}/discover/movie?api_key={TMDB_API_KEY}"
         url += f"&vote_average.gte={min_rating}&primary_release_year={year}&with_original_language={language}"
         if genres:
@@ -101,35 +103,83 @@ def about():
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
-        # Process form data here
         return render_template('contact.html', success=True)
     return render_template('contact.html')
 
 @app.route('/get_random_movies')
 def get_random_movies():
+    try:
+        random_page = random.randint(1, 20) 
+        response = requests.get(f'{BASE_URL}/movie/popular?api_key={TMDB_API_KEY}&page={random_page}')
+        if response.status_code == 200:
+            data = response.json()
+            movies = data['results']
+            random.shuffle(movies)  # Shuffle to get different ones each time
+            return jsonify(movies[:6])
+        else:
+            return jsonify({'error': 'Failed to fetch data from TMDB'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
+@app.route('/movie_details/<int:movie_id>')
+def movie_details(movie_id):
+    try:
+        # Fetch basic movie details
+        url = f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API_KEY}&language=en-US'
+        response = requests.get(url)
+        if response.status_code != 200:
+            return jsonify({'error': 'Movie not found'}), 404
+        
+        movie_data = response.json()
+
+        # Fetch cast details
+        cast_url = f'https://api.themoviedb.org/3/movie/{movie_id}/credits?api_key={TMDB_API_KEY}'
+        cast_response = requests.get(cast_url)
+        cast_data = cast_response.json() if cast_response.status_code == 200 else {}
+
+        # Fetch crew details (including director)
+        crew_url = f'https://api.themoviedb.org/3/movie/{movie_id}/credits?api_key={TMDB_API_KEY}'
+        crew_response = requests.get(crew_url)
+        crew_data = crew_response.json() if crew_response.status_code == 200 else {}
+
+        # Prepare movie info along with cast and crew
+        movie_info = {
+            'id': movie_data.get('id'),
+            'title': movie_data.get('title'),
+            'release_date': movie_data.get('release_date'),
+            'overview': movie_data.get('overview'),
+            'vote_average': movie_data.get('vote_average'),
+            'poster_path': movie_data.get('poster_path'),
+            'genres': movie_data.get('genres', []),
+            'runtime': movie_data.get('runtime'),
+            'language': movie_data.get('original_language'),
+            'cast': cast_data.get('cast', []),
+            'crew': crew_data.get('crew', []),  # Includes director
+        }
+
+        return jsonify(movie_info)
+
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+@app.route('/get_movies_by_language/<language>')
+def get_movies_by_language(language):
+    url = f"{BASE_URL}/discover/movie?api_key={TMDB_API_KEY}&with_original_language={language}"
+    response = requests.get(url)
+    movies = response.json().get('results', [])
+    return jsonify(movies[:6])  # Show only 6 movies
+
+
+@app.route('/get_surprise_movie')
+def get_surprise_movie():
     url = f"{BASE_URL}/discover/movie?api_key={TMDB_API_KEY}&sort_by=popularity.desc"
     response = requests.get(url)
     movies = response.json().get('results', [])
-    random_movies = random.sample(movies, min(3, len(movies)))
+    random_movies = random.sample(movies, 3)  # Get 3 random movies
     return jsonify(random_movies)
 
-@app.route('/get_trending_movies')
-def get_trending_movies():
-    url = f"{BASE_URL}/trending/movie/week?api_key={TMDB_API_KEY}"
-    response = requests.get(url)
-    movies = response.json().get('results', [])
-    return jsonify(movies[:10])
-
-@app.route('/get_movie_quote')
-def get_movie_quote():
-    quotes = [
-        {"text": "May the Force be with you.", "movie": "Star Wars"},
-        {"text": "Here's looking at you, kid.", "movie": "Casablanca"},
-        {"text": "You can't handle the truth!", "movie": "A Few Good Men"},
-        {"text": "Life is like a box of chocolates.", "movie": "Forrest Gump"},
-        {"text": "I'll be back.", "movie": "The Terminator"}
-    ]
-    return jsonify(random.choice(quotes))
 
 @app.errorhandler(404)
 def page_not_found(e):
